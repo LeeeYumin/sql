@@ -328,3 +328,235 @@ from dual;
 
 select 'The Job id for ' || UPPER(last_name) || ' is ' || lower(job_id) as "EMPLOYEE DETAILS"
 from employees;
+
+select employee_id, last_name, department_id
+from employees
+where lower(last_name) = 'higgins'; --대소문자 모를때
+
+select last_name, substr(last_name, 2, 2)
+from employees
+where department_id=90; --시작위치2, 몇개잘라낼지2
+
+select last_name, substr(last_name, -3, 2) 
+from employees
+where department_id=90; --뒤에서부터-3, 몇개잘라낼지2
+
+select  employee_id, concat(first_name, last_name) name, 
+job_id, length (last_name),
+instr (last_name, 'a') "Contains 'a'?"
+from employees
+where substr(job_id, 4) = 'REP'; 
+
+select ltrim ('yyedaymy', 'yea')
+from dual;
+
+select rtrim ('yyedaymy', 'yea')
+from dual;
+
+--숫자함수
+select round(345.678) as round1,
+round (345.678, 0) as  round2,
+round (345.678, 1) as  round3,
+round (345.678, -1) as  round4
+from dual; --올림
+ 
+ select trunc(345.678) as trunc1,
+trunc(345.678, 0) as  trunc2,
+trunc(345.678, 1) as  trunc3,
+trunc (345.678, -1) as  trunc4
+from dual; --절삭
+
+select last_name, salary,mod(salary, 5000)
+from employees; 
+
+--문제 4개
+--현재 날짜를 표시하는 질의를 작성하고 열 레이블을 Date로 지정
+select sysdate "Date"
+from dual;
+
+--각 사원에 대해 사원 번호, 이름, 급여 및 15% 인상된 급여를 "정수로 표시"
+--인상된 급여 열의 레이블을 New Salary로 지정
+select employee_id, last_name, salary, round(salary*1.15) "New Salary"
+from employees;
+
+--2번 질의를 수정하여 새 급여에서 이전 급여를 빼는 새 열을 추가
+--레이블을 Increase로 지정하고 수정한 질의를 실행
+SELECT employee_id, last_name, salary, 
+                    ROUND(salary*1.15) "New Salary",
+                    (salary*1.15)-salary "Increase"
+FROM   employees;
+
+--이름이 J, A 또는 M으로 시작하는 모든 사원의 이름(대문자 표시) 및 이름 길이를 표시하는 질의를 작성
+--각열에 적합한 레이블을 지정
+SELECT UPPER(last_name) name, 
+                    LENGTH(last_name) name_length
+FROM   employees
+WHERE  UPPER(SUBSTR(last_name, 1, 1)) IN ('J', 'A', 'M')
+ORDER BY 1;
+
+--시간
+select sysdate
+from dual;
+
+select last_name, (sysdate-hire_date)/7 as weeks
+from employees
+where department_id = 90; --미국은 주급으로 줘서 7로 나눔
+
+--날짜
+select employee_id, hire_date, months_between (sysdate,  hire_date) tenure,
+           add_months (hire_date, 6) review,
+           next_day (hire_date, '금'),
+           last_day (hire_date)
+from employees; --확인
+
+select round( sysdate, 'year'),
+            round( sysdate, 'month'),
+            round( sysdate, 'day'),
+            round( sysdate, 'dd')
+from dual; --day의 중간은 수요일. 시간은 정오.
+
+select trunc( sysdate, 'year'),
+            trunc( sysdate, 'month'),
+            trunc( sysdate, 'day'),
+            trunc( sysdate, 'dd')
+from dual;
+
+--변환함수
+select *
+from employees
+where employee_id = '101'; --형태만 같으면 암시적변환됨
+
+alter session set
+nls_date_language = american; --껐다 키면 원상복구됨
+
+select employee_id, to_char(hire_date, 'MM/YY')
+from employees; --yy/mm/dd를 mm/yy로
+
+select last_name, to_char(hire_date, 'DD Month YYYY')
+from employees; --위에 nls_date_language = american 해놔서 June 으로 뜸
+
+select last_name, to_char(hire_date, 'DD month YYYY')
+from employees;
+
+select last_name, to_char(hire_date, 'DD MONTH YYYY')
+from employees;
+
+select last_name, to_char(hire_date, 'fmDD MONTH YYYY')
+from employees; --fm붙으면 공백지우고 0지움
+
+select last_name, to_char(hire_date, 'fmDdspth "of" Month YYYY fmHH:MI:SS AM')
+from employees; --AM대신 PM도 가능
+
+select to_char(salary, '$99,999.00') SALARY
+from employees;
+
+select to_char(salary, '$9,999.00') SALARY
+from employees; --자리수 넘어간 수는 #로 표기됨
+
+--문자→숫자
+select to_number('$3,400', '$99,999')
+from dual;
+
+--문자→날짜
+select to_date('2010년, 02월', 'YYYY"년", MM"월"')
+from dual;
+
+select last_name, hire_date
+from employees
+where hire_date > to_date('2005년 07월 01일', 'YYYY"년" MM"월" DD"일"'); --시스템 날짜 형식을 모를때 형식 지정.
+
+select last_name, hire_date
+from employees
+where hire_date > to_date('05/07/01', 'YY-MM-DD'); --위랑 같은 결과.
+
+select last_name, hire_date
+from employees
+where hire_date > to_date('05/07/01', 'fxYY-MM-DD'); --실행안됨.
+
+select last_name, hire_date
+from employees
+where hire_date > to_date('05/07/01', 'fxYY/MM/DD'); --실행됨.
+
+--일반함수
+select last_name, salary, NVL(commission_pct, 0), (salary*12) + (salary*12*NVL (commission_pct,0)) AN_SAL
+from employees;
+
+select last_name, salary, NVL(commission_pct, '보너스 없음')
+from employees; --문자 타입 통일 안시켜서 오류뜸
+
+select last_name, salary, NVL(to_char(commission_pct), '보너스 없음')
+from employees; --타입 통일 시켜줘서 값 뜸
+
+select last_name, salary, commission_pct, NVL2(commission_pct, 'SAL+COMM', 'SAL') income
+from employees; --'SAL+COMM', 'SAL' 2개 위치의 값은 타입 같아야 됨
+
+select first_name, length(first_name) "expr1", last_name, length(last_name) "expr2",
+          nullif (length(first_name), length(last_name)) result
+from employees;
+
+--조건처리
+select last_name, job_id, salary,
+          CASE job_id WHEN 'IT_PROG'    THEN 1.10*salary
+                                WHEN 'ST_CLERK' THEN 1.15*salary
+                                WHEN 'SA_REP'      THEN 1.20*salary
+                                ELSE salary
+           END "REVISE_SALARY"
+from employees; --들여쓰기잘해주기
+
+select last_name, salary,
+          CASE WHEN salary<5000 THEN 'Low'
+                     WHEN salary<10000 THEN 'Medium'
+                     WHEN salary<20000 THEN 'Good'
+                                                       ELSE  'Excellent'
+           END qualified_salary
+from employees; --작은값부터 구할때는 작은값부터 적어주기  
+
+select last_name, job_id, salary,
+          DECODE(job_id,  'IT_PROG',    1.10*salary,
+                                       'ST_CLERK', 1.15*salary,
+                                       'SA_REP',      1.20*salary,
+                                                              salary)
+        REVISED_SALARY
+from employees;   
+
+--문제풀이 03,04
+--각 사원의 이름을 표시하고 근무 달 수(입사일로부터 현재까지의 달 수)를 계산하여
+--열 레이블을 MONTHS_WORKED로 지정. 결과는 정수로 반올림하여 표시. (날짜함수사용)
+select last_name, round(months_between (sysdate,  hire_date) tenure)/12, "MONTHS_WORKED",
+from employees;
+
+
+--모든 사원의 성 및 급여를 표시하기 위한 query를 작성.
+--급여가 15자 길이로 표시되고 왼쪽에 # 기호가 채워지도록 형식을 지정.
+--열 레이블을 SALARY 로 지정. (문자함수사용)
+select last_name, salary "SALARY",
+from employees
+
+
+
+
+--부서 90의 모든 사원에 대해 성(last_name) 및 재직 기간(주 단위)을 표시하도록 query 를 작성.
+--주를 나타내는 숫자 열의 레이블로 TENURE를 지정하고 주를 나타내는 숫자 값을 정수로 나타내기. (날짜연산)
+
+
+
+
+--각 사원에 대해 다음 항목을 생성하는 질의를 작성하고 열 레이블을 Dream Salaries로 지정하시오.
+--<employee last_name> earns <salary> monthly but wants <salary의 3배>. 
+--<예시> Matos earns $2,600.00 monthly but wants $7,800.00. (변환함수, 연결연산자)
+
+
+
+--사원의 이름, 입사일 및 급여 검토일을 표시. 급여 검토일은 여섯 달이 경과한 후 첫번째 월요일.
+--열 레이블을 REVIEW로 지정하고 날짜는 "2010.03.31 월요일"과 같은 형식으로 표시되도록 지정하시오. (날짜함수)
+
+
+--이름, 입사일 및 업무 시작 요일을 표시하고 열 레이블을 DAY로 지정. 월요일을 시작으로 해서 요일을 기준으로 결과를 정렬.(산수)
+
+
+--사원의 이름과 커미션을 표시하는 질의를 작성. 커미션을 받지 않는 사원일 경우 “No Commission”을 표시.  (NVL함수)
+--열 레이블은 COMM으로 지정.
+
+
+--DECODE 함수와 CASE 구문을 사용하여 다음 데이터에 따라 JOB_ID 열의 값을 기준으로 모든 사원의 등급을 표시하는 질의를 작성.
+--
